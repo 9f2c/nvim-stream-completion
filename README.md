@@ -16,7 +16,7 @@ Real-time streaming text completion for Neovim using OpenAI-compatible APIs.
 ### Using lazy.nvim
 ```lua
 {
-  'your-username/nvim-stream-completion',
+  '9f2c/nvim-stream-completion',
   config = function()
     require('stream-completion').setup({
       api_key = os.getenv("OPENAI_API_KEY"),
@@ -29,7 +29,7 @@ Real-time streaming text completion for Neovim using OpenAI-compatible APIs.
 ### Using packer.nvim
 ```lua
 use {
-  'your-username/nvim-stream-completion',
+  '9f2c/nvim-stream-completion',
   config = function()
     require('stream-completion').setup()
   end
@@ -97,3 +97,6 @@ vim.keymap.set('i', '<S-Tab>', '<cmd>StreamCompletionReject<CR>')
 
 ## License
 MIT
+
+## Disclaimer
+all of this is vibe coded
