@@ -1,6 +1,7 @@
 local config = require('stream-completion.config')
 local api = require('stream-completion.api')
 local ui = require('stream-completion.ui')
+local performance = require('stream-completion.performance')
 
 local M = {}
 
@@ -167,8 +168,6 @@ end
 function M.is_enabled()
   return enabled
 end
-
-local performance = require('stream-completion.performance')
 
 -- Status function
 function M.status()
