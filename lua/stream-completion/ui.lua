@@ -55,9 +55,10 @@ function M.accept_completion()
     return false
   end
   
-  local bufnr = completion_bufnr
-  local row = completion_row
-  local col = completion_col
+  -- Get current cursor position (not stored position)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  row = row - 1 -- Convert to 0-based indexing
   
   -- Clear the virtual text first
   M.clear_completion()
@@ -70,17 +71,27 @@ function M.accept_completion()
   
   local current_line = lines[1]
   
-  -- Insert completion at cursor position
-  local new_text = current_line:sub(1, col) .. current_completion .. current_line:sub(col + 1)
+  -- Insert completion at current cursor position
+  local before_cursor = current_line:sub(1, col)
+  local after_cursor = current_line:sub(col + 1)
+  local new_text = before_cursor .. current_completion .. after_cursor
   
   -- Split by newlines and set lines
   local new_lines = vim.split(new_text, "\n")
   vim.api.nvim_buf_set_lines(bufnr, row, row + 1, false, new_lines)
   
-  -- Move cursor to end of completion
+  -- Move cursor to end of inserted completion
   local completion_lines = vim.split(current_completion, "\n")
   local final_row = row + #completion_lines - 1
-  local final_col = #completion_lines == 1 and col + #current_completion or #completion_lines[#completion_lines]
+  local final_col
+  
+  if #completion_lines == 1 then
+    -- Single line completion
+    final_col = col + #current_completion
+  else
+    -- Multi-line completion
+    final_col = #completion_lines[#completion_lines]
+  end
   
   vim.api.nvim_win_set_cursor(0, { final_row + 1, final_col })
   
