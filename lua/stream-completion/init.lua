@@ -54,114 +54,6 @@ function M.setup_autocmds()
   })
 end
 
-function M.on_text_changed()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local filetype = vim.bo[bufnr].filetype
-  
-  -- Check if filetype is excluded
-  if vim.tbl_contains(config.options.exclude_filetypes, filetype) then
-    return
-  end
-  
-  -- Check if filetype is allowed (if whitelist is specified)
-  if #config.options.filetypes > 0 and not vim.tbl_contains(config.options.filetypes, filetype) then
-    return
-  end
-  
-  -- Cancel any existing operations
-  api.cancel_completion()
-  ui.clear_completion()
-  
-  -- Clear existing timers
-  if timer then
-    vim.loop.timer_stop(timer)
-  end
-  if debounce_timer then
-    vim.loop.timer_stop(debounce_timer)
-  end
-  
-  -- Get current context
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  row = row - 1 -- Convert to 0-based
-  
-  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-  local full_text = table.concat(lines, "\n")
-  
-  -- Check minimum character requirement
-  if #full_text < config.options.min_chars then
-    return
-  end
-  
-  last_change_time = vim.loop.now()
-  
-  -- Set up debounced completion request
-  debounce_timer = vim.loop.new_timer()
-  debounce_timer:start(config.options.debounce_ms, 0, vim.schedule_wrap(function()
-    -- Check if text changed during debounce period
-    local current_time = vim.loop.now()
-    if current_time - last_change_time < config.options.debounce_ms then
-      return
-    end
-    
-    -- Set up delayed completion request
-    timer = vim.loop.new_timer()
-    timer:start(config.options.delay_ms, 0, vim.schedule_wrap(function()
-      M.request_completion(full_text, row, col, bufnr)
-    end))
-  end))
-end
-
-function M.request_completion(text, row, col, bufnr)
-  -- Verify we're still in the same buffer and position is still valid
-  if vim.api.nvim_get_current_buf() ~= bufnr then
-    return
-  end
-  
-  api.get_completion(text, function(completion)
-    vim.schedule(function()
-      -- Double-check we're still in the right context
-      if vim.api.nvim_get_current_buf() == bufnr then
-        ui.show_completion(completion, row, col, bufnr)
-      end
-    end)
-  end)
-end
-
-function M.enable()
-  enabled = true
-  vim.notify("Stream Completion enabled", vim.log.levels.INFO)
-end
-
-function M.disable()
-  enabled = false
-  ui.clear_completion()
-  api.cancel_completion()
-  vim.notify("Stream Completion disabled", vim.log.levels.INFO)
-end
-
-function M.toggle()
-  if enabled then
-    M.disable()
-  else
-    M.enable()
-  end
-end
-
-function M.accept_completion()
-  return ui.accept_completion()
-end
-
-function M.reject_completion()
-  ui.clear_completion()
-  api.cancel_completion()
-end
-
-function M.is_enabled()
-  return enabled
-end
-
-local performance = require('stream-completion.performance')
-
 -- Enhanced text change handler
 function M.on_text_changed()
   local bufnr = vim.api.nvim_get_current_buf()
@@ -226,6 +118,57 @@ function M.on_text_changed()
     end))
   end))
 end
+
+function M.request_completion(text, row, col, bufnr)
+  -- Verify we're still in the same buffer and position is still valid
+  if vim.api.nvim_get_current_buf() ~= bufnr then
+    return
+  end
+  
+  api.get_completion(text, function(completion)
+    vim.schedule(function()
+      -- Double-check we're still in the right context
+      if vim.api.nvim_get_current_buf() == bufnr then
+        ui.show_completion(completion, row, col, bufnr)
+      end
+    end)
+  end)
+end
+
+function M.enable()
+  enabled = true
+  vim.notify("Stream Completion enabled", vim.log.levels.INFO)
+end
+
+function M.disable()
+  enabled = false
+  ui.clear_completion()
+  api.cancel_completion()
+  vim.notify("Stream Completion disabled", vim.log.levels.INFO)
+end
+
+function M.toggle()
+  if enabled then
+    M.disable()
+  else
+    M.enable()
+  end
+end
+
+function M.accept_completion()
+  return ui.accept_completion()
+end
+
+function M.reject_completion()
+  ui.clear_completion()
+  api.cancel_completion()
+end
+
+function M.is_enabled()
+  return enabled
+end
+
+local performance = require('stream-completion.performance')
 
 -- Status function
 function M.status()
