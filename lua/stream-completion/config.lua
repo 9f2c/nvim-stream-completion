@@ -7,8 +7,8 @@ M.defaults = {
   model = "whatever",
   
   -- Completion settings
-  max_tokens = 30,
-  temperature = 0.5,
+  max_tokens = 100,
+  temperature = 0.3,
   delay_ms = 1000, -- Delay before making API request
   
   -- UI settings
@@ -18,7 +18,7 @@ M.defaults = {
   
   -- Behavior
   auto_trigger = true,
-  min_chars = 3, -- Minimum characters before triggering
+  min_chars = 1, -- Minimum characters before triggering
   debounce_ms = 500, -- Debounce time for text changes
   
   -- File types to enable (empty means all)
