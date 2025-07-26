@@ -19,7 +19,7 @@ command! StreamCompletionHealth lua vim.health.report_start('Stream Completion')
 
 " Default keymaps (can be overridden by user)
 if !exists('g:stream_completion_no_default_mappings')
-  inoremap <silent> <C-i> <cmd>StreamCompletionAccept<CR>
+  inoremap <silent> <C-g> <cmd>StreamCompletionAccept<CR>
   inoremap <silent> <C-x> <cmd>StreamCompletionReject<CR>
   inoremap <silent> <C-Space> <cmd>StreamCompletionCompleteNow<CR>
   nnoremap <silent> <leader>sc <cmd>StreamCompletionToggle<CR>
