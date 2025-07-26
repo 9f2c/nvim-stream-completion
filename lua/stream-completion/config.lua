@@ -7,8 +7,8 @@ M.defaults = {
   model = "whatever",
   
   -- Completion settings
-  max_tokens = 200,
-  temperature = 0.1,
+  max_tokens = 30,
+  temperature = 0.5,
   delay_ms = 1000, -- Delay before making API request
   
   -- UI settings
